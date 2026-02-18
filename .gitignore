@@ -1,0 +1,42 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+
+# Virtual Environments
+venv/
+env/
+ENV/
+whereswaldo/
+.conda/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Logs
+*.log
+
+# Large model checkpoint files (if you save trained models)
+# Uncomment these if you create model files you don't want to track:
+# *.h5
+# *.pth
+# *.ckpt
+# saved_models/
+# checkpoints/
+
+# Temporary files
+.cache/
+.pytest_cache/
+*.tmp
