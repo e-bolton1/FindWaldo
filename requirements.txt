@@ -1,0 +1,4 @@
+tensorflow>=2.8
+matplotlib
+numpy
+pillow
