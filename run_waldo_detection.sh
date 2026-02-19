@@ -1,14 +1,17 @@
+
+
 #!/bin/bash
-# Batch script to run object detection and localization on Aire supercomputer
+
 #SBATCH --job-name=waldo_detection
-#SBATCH --output=waldo_detection.out
-#SBATCH --error=waldo_detection.err
-#SBATCH --time=04:00:00
-#SBATCH --partition=standard
-#SBATCH --nodes=1
+#SBATCH --time=00:30:00
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
+#SBATCH --output=waldo_detection_%j_%a.out
+#SBATCH --error=waldo_detection_%j_%a.err
+
 
 # Load modules (adjust as needed for Aire)
 module load python/3.9
