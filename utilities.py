@@ -274,7 +274,8 @@ def evaluate_ranking_predictions(image_list, predicted_confidences):
 # -----------------------------------------------------------
 # Make different sizes of Waldo for scale-breaking game
 # -----------------------------------------------------------
-
+waldo_sprite = Image.open('images/finding_waldo/waldo.png').convert("RGBA")
+bg_full = Image.open('images/finding_waldo/wheres_wally.jpg').convert("RGB")
 
 def waldo_sizing_challenge(base_x, base_y):
     """Interactive challenge to find the smallest Waldo the AI can detect"""
