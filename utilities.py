@@ -359,9 +359,6 @@ def waldo_sizing_challenge(base_x, base_y):
     print(f"\nFinal Score: {score}/10 points")
     return score, results
 
-# Run the challenge
-final_score, attempt_results = waldo_sizing_challenge(200, 150)
-
 
 
 
