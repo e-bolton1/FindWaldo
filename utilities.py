@@ -275,7 +275,7 @@ def evaluate_ranking_predictions(image_list, predicted_confidences):
 # Make different sizes of Waldo for scale-breaking game
 # -----------------------------------------------------------
 
-def waldo_sizing_challenge(base_x, base_y, waldo_sprite, bg_full):
+def waldo_sizing_challenge(base_x, base_y):
     """Interactive challenge to find the smallest Waldo the AI can detect"""
     
     print("🎯 Waldo Sizing Challenge!")
@@ -289,7 +289,7 @@ def waldo_sizing_challenge(base_x, base_y, waldo_sprite, bg_full):
     for attempt in range(1, 3):
         print(f"--- Attempt {attempt} ---")
         
-        # Get valid height input
+        # Get height input from user
         while True:
             try:
                 height = int(input(f"Enter Waldo HEIGHT (10-300): "))
@@ -299,16 +299,19 @@ def waldo_sizing_challenge(base_x, base_y, waldo_sprite, bg_full):
             except ValueError:
                 print("❌ Please enter a valid number!")
         
-        # Calculate proportional width and create image
+        # Calculate proportional width
         width = int(height * 0.6)
+        
+        # Create new image with resized Waldo
         bg = bg_full.copy()
         waldo_resized = waldo_sprite.resize((width, height), Image.LANCZOS)
         bg.paste(waldo_resized, (base_x, base_y), waldo_resized)
         
-        # Test with AI
-        dets, annotated, msg = detect_wally(bg)
-        confidence = dets[0][1] if len(dets) > 0 else 0
+        # Test this new image with YOLO model
+        dets, annotated, msg = detect_wally(bg)  # This runs YOLO on the new image
+        confidence = dets[0][1] if len(dets) > 0 else 0  # Extract confidence score
         
+        # Store results
         results.append({
             'height': height,
             'width': width, 
@@ -316,43 +319,47 @@ def waldo_sizing_challenge(base_x, base_y, waldo_sprite, bg_full):
             'detected': confidence > 0.9
         })
         
-        # Show result
-        show(annotated, f"Attempt {attempt}: {width}x{height} - Confidence: {confidence:.3f}")
+        # Display the annotated result
+        show(annotated, f"Attempt {attempt}: Waldo {width}x{height}px")
         status = "✅ DETECTED" if confidence > 0.9 else "❌ TOO SMALL"
-        print(f"Size: {width}x{height} | Confidence: {confidence:.3f} | {status}")
+        print(f"Waldo Size: {width}x{height}px | YOLO Confidence: {confidence:.3f} | {status}")
         print()
     
-    # Calculate score
+    # Calculate final score based on smallest successful detection
     print("🏆 FINAL SCORING:")
-    print("-" * 30)
+    print("-" * 40)
     
     valid_results = [r for r in results if r['detected']]
     
     if not valid_results:
-        print("❌ No successful detections - 0 points")
+        print("❌ YOLO failed to detect any Waldo - 0 points")
         score = 0
     else:
         smallest_height = min(r['height'] for r in valid_results)
-        print(f"✅ Smallest successful height: {smallest_height}px")
+        print(f"✅ Smallest Waldo YOLO detected: {smallest_height}px height")
         
+        # Score based on how small they got it while maintaining >90% confidence
         if smallest_height <= 40:
             score = 10
-            print("🌟 AMAZING! Tiny Waldo - 10 points!")
+            print("🌟 INCREDIBLE! Tiny Waldo detected by YOLO - 10 points!")
         elif smallest_height <= 60:
             score = 8  
-            print("🎉 EXCELLENT! Small Waldo - 8 points!")
+            print("🎉 EXCELLENT! Small Waldo detected by YOLO - 8 points!")
         elif smallest_height <= 80:
             score = 6
-            print("👍 GOOD! Medium Waldo - 6 points!")
+            print("👍 GOOD! Medium Waldo detected by YOLO - 6 points!")
         elif smallest_height <= 100:
             score = 4
-            print("✅ DECENT! Large Waldo - 4 points!")
+            print("✅ DECENT! Large Waldo detected by YOLO - 4 points!")
         else:
             score = 2
-            print("📏 Very large Waldo only - 2 points!")
+            print("📏 Only very large Waldo detected by YOLO - 2 points!")
     
     print(f"\nFinal Score: {score}/10 points")
     return score, results
+
+# Run the challenge
+final_score, attempt_results = waldo_sizing_challenge(200, 150)
 
 
 
