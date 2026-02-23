@@ -47,23 +47,26 @@ def show(img_bgr, title=""):
 # -----------------------------------------------------------
 
 def detect_wally(img_path, conf_thr=0.25):
-    """Run YOLO detection on an image path."""
     results = trained.predict(img_path, conf=conf_thr, verbose=False)
     result = results[0]
     img = result.orig_img.copy()
 
     detections = []
-    if result.boxes is not None:
-        for box in result.boxes:
-            xyxy = box.xyxy.cpu().numpy()[0]
-            score = float(box.conf.cpu().numpy()[0])
-            cls = int(box.cls.cpu().numpy()[0])
-            detections.append((xyxy, score, cls))
+    if result.boxes is not None and len(result.boxes) > 0:
+        # Get only the box with highest confidence
+        confidences = result.boxes.conf.cpu().numpy()
+        best_idx = confidences.argmax()
+        box = result.boxes[best_idx]
+        
+        xyxy = box.xyxy.cpu().numpy()[0]
+        conf = float(box.conf.cpu().numpy()[0])
+        cls = int(box.cls.cpu().numpy()[0])
+        detections.append((xyxy, conf, cls))
 
-            x1,y1,x2,y2 = map(int, xyxy)
-            cv2.rectangle(img,(x1,y1),(x2,y2),(255,0,0),3)
-            cv2.putText(img,f"{score:.2f}",(x1,y1-5),
-                        cv2.FONT_HERSHEY_SIMPLEX,0.7,(255,0,0),2)
+        x1,y1,x2,y2 = map(int, xyxy)
+        cv2.rectangle(img, (x1,y1), (x2,y2), (255,0,0), 3)
+        cv2.putText(img, f"{conf:.2f}", (x1, y1 - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
 
     return detections, img, result
 
@@ -101,11 +104,11 @@ def scale_guess(img_path, scale):
     dets, ann, _ = detect_wally(temp)
 
     if len(dets) == 0:
-        msg = f"💥 Guess {_scale_guesses_used}: AI FAILED at scale {scale}! You broke it!"
+        msg = f"Guess {_scale_guesses_used}: AI couldn't find Wally at scale {scale}! You broke it!"
         return dets, ann, msg
     else:
         conf = dets[0][1]
-        msg = f"🤖 Guess {_scale_guesses_used}: AI survived at {scale} (conf={conf:.2f}). Try smaller!"
+        msg = f"Guess {_scale_guesses_used}: AI detected something at {scale} (conf={conf:.2f})"
         return dets, ann, msg
 
 
@@ -113,9 +116,12 @@ def scale_guess(img_path, scale):
 # OCCLUSION / BLUR ATTACK
 # -----------------------------------------------------------
 
-def blur_attack(img_path, size=60):
+def blur_attack(img_path, blur_strength=51):
     """
     Automatically detects Wally, then applies a blur on top of him.
+    
+    Args:
+        blur_strength: Intensity of blur (must be odd number, higher = more blur)
     """
     dets, ann, _ = detect_wally(img_path)
     if len(dets) == 0:
@@ -128,17 +134,22 @@ def blur_attack(img_path, size=60):
     img = cv2.imread(img_path)
     H, W = img.shape[:2]
 
+    size = 60  # fixed region size
     bx1, by1 = max(0, cx-size), max(0, cy-size)
     bx2, by2 = min(W, cx+size), min(H, cy+size)
 
     attacked = img.copy()
-    attacked[by1:by2, bx1:bx2] = cv2.GaussianBlur(attacked[by1:by2, bx1:bx2], (51,51), 0)
+    # Ensure blur_strength is odd
+    if blur_strength % 2 == 0:
+        blur_strength += 1
+    attacked[by1:by2, bx1:bx2] = cv2.GaussianBlur(attacked[by1:by2, bx1:bx2], (blur_strength, blur_strength), 0)
 
     temp = os.path.join(_temp_dir, f"wally_blur_{uuid.uuid4()}.jpg")
     cv2.imwrite(temp, attacked)
 
     dets2, ann2, _ = detect_wally(temp)
-    return dets2, ann2, f"Blur attack applied. Before: {score:.2f}, After: {[d[1] for d in dets2] if dets2 else 0}"
+    after_conf = dets2[0][1] if len(dets2) > 0 else 0
+    return dets2, ann2, f"Blur attack (strength={blur_strength}). Before: {score:.2f}, After: {after_conf:.2f}"
 
 
 # -----------------------------------------------------------
