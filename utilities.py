@@ -275,7 +275,7 @@ def evaluate_ranking_predictions(image_list, predicted_confidences):
 # Make different sizes of Waldo for scale-breaking game
 # -----------------------------------------------------------
 
-def waldo_sizing_challenge(base_x, base_y):
+def waldo_sizing_challenge(base_x, base_y, waldo_sprite, bg_full):
     """Interactive challenge to find the smallest Waldo the AI can detect"""
     
     print("🎯 Waldo Sizing Challenge!")
