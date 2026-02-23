@@ -271,12 +271,29 @@ def evaluate_ranking_predictions(image_list, predicted_confidences):
     return total_points
 
 
+# -----------------------------------------------------------
+# Make different sizes of Waldo for scale-breaking game
+# -----------------------------------------------------------
 
 
-
-
-
-
+def make_waldo_different_sizes(base_x, base_y, sizes):
+    """Simply place Waldo at different sizes on the background"""
+    images = []
+    
+    for i, (w, h) in enumerate(sizes):
+        # Use original background without modification
+        bg = bg_full.copy()
+        
+        # Resize Waldo
+        waldo_resized = waldo_sprite.resize((w, h), Image.LANCZOS)
+        
+        # Paste Waldo on background
+        bg.paste(waldo_resized, (base_x, base_y), waldo_resized)
+        
+        images.append(bg)
+        print(f"Created Waldo size: {w}x{h}")
+    
+    return images
 
 
 
