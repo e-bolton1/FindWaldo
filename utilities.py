@@ -280,81 +280,77 @@ def waldo_sizing_challenge(base_x, base_y):
     """Interactive challenge to find the smallest Waldo the AI can detect"""
     
     print("🎯 Waldo Sizing Challenge!")
-    print("Find the smallest Waldo size the AI can still detect with >90% confidence")
-    print("You get 2 attempts to find the optimal size.")
+    print("Find the smallest Waldo HEIGHT the AI can still detect with >90% confidence")
+    print("You get 2 attempts. Valid range: 10-300 pixels")
+    print("(Width automatically calculated to maintain proportions)")
     print()
     
-    sizes = []
     results = []
     
-    # Get 2 size inputs from user
     for attempt in range(1, 3):
         print(f"--- Attempt {attempt} ---")
         
-        try:
-            width = int(input(f"Enter Waldo WIDTH for attempt {attempt}: "))
-            height = int(input(f"Enter Waldo HEIGHT for attempt {attempt}: "))
-            sizes.append((width, height))
-            
-            # Create image with this size
-            bg = bg_full.copy()
-            waldo_resized = waldo_sprite.resize((width, height), Image.LANCZOS)
-            bg.paste(waldo_resized, (base_x, base_y), waldo_resized)
-            
-            # Test with AI
-            dets, annotated, msg = detect_wally(bg)
-            confidence = dets[0][1] if len(dets) > 0 else 0
-            
-            results.append({
-                'size': (width, height),
-                'confidence': confidence,
-                'area': width * height,
-                'detected': len(dets) > 0
-            })
-            
-            # Display result
-            show(annotated, f"Attempt {attempt}: {width}x{height} - Confidence: {confidence:.3f}")
-            print(f"Confidence: {confidence:.3f} {'✅ DETECTED' if confidence > 0.9 else '❌ TOO SMALL'}")
-            print()
-            
-        except ValueError:
-            print("Please enter valid numbers!")
-            continue
+        # Get valid height input
+        while True:
+            try:
+                height = int(input(f"Enter Waldo HEIGHT (10-300): "))
+                if 10 <= height <= 300:
+                    break
+                print(f"❌ Must be between 10-300 pixels!")
+            except ValueError:
+                print("❌ Please enter a valid number!")
+        
+        # Calculate proportional width and create image
+        width = int(height * 0.6)
+        bg = bg_full.copy()
+        waldo_resized = waldo_sprite.resize((width, height), Image.LANCZOS)
+        bg.paste(waldo_resized, (base_x, base_y), waldo_resized)
+        
+        # Test with AI
+        dets, annotated, msg = detect_wally(bg)
+        confidence = dets[0][1] if len(dets) > 0 else 0
+        
+        results.append({
+            'height': height,
+            'width': width, 
+            'confidence': confidence,
+            'detected': confidence > 0.9
+        })
+        
+        # Show result
+        show(annotated, f"Attempt {attempt}: {width}x{height} - Confidence: {confidence:.3f}")
+        status = "✅ DETECTED" if confidence > 0.9 else "❌ TOO SMALL"
+        print(f"Size: {width}x{height} | Confidence: {confidence:.3f} | {status}")
+        print()
     
     # Calculate score
-    print("=" * 50)
-    print("🏆 SCORING:")
-    print("=" * 50)
+    print("🏆 FINAL SCORING:")
+    print("-" * 30)
     
-    # Find valid detections (confidence > 0.9)
-    valid_detections = [r for r in results if r['confidence'] > 0.9]
+    valid_results = [r for r in results if r['detected']]
     
-    if not valid_detections:
-        print("❌ No valid detections with >90% confidence")
+    if not valid_results:
+        print("❌ No successful detections - 0 points")
         score = 0
     else:
-        # Find smallest valid size (by area)
-        smallest_valid = min(valid_detections, key=lambda x: x['area'])
-        smallest_area = smallest_valid['area']
+        smallest_height = min(r['height'] for r in valid_results)
+        print(f"✅ Smallest successful height: {smallest_height}px")
         
-        print(f"Smallest valid size: {smallest_valid['size']} (area: {smallest_area})")
-        
-        # Scoring based on how small they got it
-        if smallest_area <= 1500:      # Very small (30x50 = 1500)
+        if smallest_height <= 40:
             score = 10
-            print("🌟 EXCELLENT! Tiny Waldo detected - 10 points!")
-        elif smallest_area <= 3000:   # Small (50x60 = 3000)
-            score = 8
-            print("🎉 GREAT! Small Waldo detected - 8 points!")
-        elif smallest_area <= 6000:   # Medium (60x100 = 6000)
+            print("🌟 AMAZING! Tiny Waldo - 10 points!")
+        elif smallest_height <= 60:
+            score = 8  
+            print("🎉 EXCELLENT! Small Waldo - 8 points!")
+        elif smallest_height <= 80:
             score = 6
-            print("👍 GOOD! Medium Waldo detected - 6 points!")
-        elif smallest_area <= 9000:   # Large (90x100 = 9000)
+            print("👍 GOOD! Medium Waldo - 6 points!")
+        elif smallest_height <= 100:
             score = 4
-            print("✅ OKAY! Large Waldo detected - 4 points!")
-        else:                          # Very large
+            print("✅ DECENT! Large Waldo - 4 points!")
+        else:
             score = 2
-            print("📏 Only very large Waldo detected - 2 points!")
+            print("📏 Very large Waldo only - 2 points!")
     
     print(f"\nFinal Score: {score}/10 points")
     return score, results
