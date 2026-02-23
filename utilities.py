@@ -28,7 +28,7 @@ _temp_dir = tempfile.gettempdir()
 
 def _make_temp_image(img_pil):
     """Save a PIL image to a unique temp file and return its path."""
-    filename = os.path.join(_temp_dir, f"waldo_tmp_{uuid.uuid4()}.jpg")
+    filename = os.path.join(_temp_dir, f"wally_tmp_{uuid.uuid4()}.jpg")
     img_pil.save(filename)
     return filename
 
@@ -46,7 +46,7 @@ def show(img_bgr, title=""):
 # DETECTION
 # -----------------------------------------------------------
 
-def detect_waldo(img_path, conf_thr=0.25):
+def detect_wally(img_path, conf_thr=0.25):
     """Run YOLO detection on an image path."""
     results = trained.predict(img_path, conf=conf_thr, verbose=False)
     result = results[0]
@@ -98,7 +98,7 @@ def scale_guess(img_path, scale):
     temp = _make_temp_image(scaled)
 
     # Run detection
-    dets, ann, _ = detect_waldo(temp)
+    dets, ann, _ = detect_wally(temp)
 
     if len(dets) == 0:
         msg = f"💥 Guess {_scale_guesses_used}: AI FAILED at scale {scale}! You broke it!"
@@ -115,11 +115,11 @@ def scale_guess(img_path, scale):
 
 def blur_attack(img_path, size=60):
     """
-    Automatically detects Waldo, then applies a blur on top of him.
+    Automatically detects Wally, then applies a blur on top of him.
     """
-    dets, ann, _ = detect_waldo(img_path)
+    dets, ann, _ = detect_wally(img_path)
     if len(dets) == 0:
-        return None, None, "⚠️ Waldo not detected in the base image."
+        return None, None, "⚠️ Wally not detected in the base image."
 
     (x1,y1,x2,y2), score, _ = dets[0]
     cx, cy = int((x1+x2)/2), int((y1+y2)/2)
@@ -134,10 +134,10 @@ def blur_attack(img_path, size=60):
     attacked = img.copy()
     attacked[by1:by2, bx1:bx2] = cv2.GaussianBlur(attacked[by1:by2, bx1:bx2], (51,51), 0)
 
-    temp = os.path.join(_temp_dir, f"waldo_blur_{uuid.uuid4()}.jpg")
+    temp = os.path.join(_temp_dir, f"wally_blur_{uuid.uuid4()}.jpg")
     cv2.imwrite(temp, attacked)
 
-    dets2, ann2, _ = detect_waldo(temp)
+    dets2, ann2, _ = detect_wally(temp)
     return dets2, ann2, f"Blur attack applied. Before: {score:.2f}, After: {[d[1] for d in dets2] if dets2 else 0}"
 
 
@@ -162,7 +162,7 @@ def augmented_versions(img_path):
 
     out = {}
     for name, im in variants.items():
-        p = os.path.join(_temp_dir, f"waldo_aug_{name}_{uuid.uuid4()}.jpg")
+        p = os.path.join(_temp_dir, f"wally_aug_{name}_{uuid.uuid4()}.jpg")
         im.save(p)
         out[name] = p
 
