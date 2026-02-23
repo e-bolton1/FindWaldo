@@ -180,6 +180,107 @@ def augmented_versions(img_path):
     return out
 
 
+# Add these two functions to utilities.py
+
+def display_images_for_ranking(image_list):
+    """
+    Display images and get user's predicted confidence scores.
+    Returns the list of predicted confidences.
+    """
+    import cv2
+    import numpy as np
+    
+    # Step 1: Display all images WITHOUT confidence scores
+    print("🖼️ Here are the images. Study them carefully!\n")
+    for i, img_path in enumerate(image_list, 1):
+        img = Image.open(img_path)
+        show(cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR), f"Image {i}: {img_path}")
+
+    # Step 2: Ask user to predict confidence scores
+    print("\n" + "="*60)
+    print("Predict the AI's confidence score for EACH image!")
+    print("="*60)
+    print("\n Enter confidence as a percentage (0-100)")
+    print("Example: If you think AI is 85% confident, enter: 85\n")
+
+    predicted_confidences = []
+    for i, img_path in enumerate(image_list, 1):
+        conf_input = float(input(f"Predicted confidence for Image {i} ({img_path}): "))
+        predicted_confidences.append(conf_input)
+    
+    return predicted_confidences
+
+
+def evaluate_ranking_predictions(image_list, predicted_confidences):
+    """
+    Run AI detection, compare with predictions, and award points.
+    Returns total points earned.
+    """
+    import cv2
+    
+    # Step 1: Get actual AI confidence scores
+    print("\n🤖 Running AI detection...\n")
+    scores = []
+    for img_path in image_list:
+        dets, img, result = detect_wally(img_path)
+        show(img, f"AI Detection: {img_path}")
+        
+        if len(dets) > 0:
+            scores.append((img_path, dets[0][1] * 100))  # Convert to percentage
+        else:
+            scores.append((img_path, 0))
+
+    # Step 2: Display results and calculate points
+    print("\n" + "="*60)
+    print("📊 RESULTS")
+    print("="*60)
+
+    total_points = 0
+    for i, (img_path, actual_conf) in enumerate(scores):
+        predicted_conf = predicted_confidences[i]
+        difference = abs(predicted_conf - actual_conf)
+        
+        print(f"\nImage {i+1}: {img_path}")
+        print(f"  👤 Your prediction: {predicted_conf:.1f}%")
+        print(f"  🤖 Actual AI confidence: {actual_conf:.1f}%")
+        print(f"  📏 Difference: {difference:.1f}%")
+        
+        # Award points based on accuracy
+        if difference <= 5:
+            points = 10
+            print(f"  🎯 EXCELLENT! Within 5%! +10 points!")
+        elif difference <= 10:
+            points = 7
+            print(f"  ✅ Good! Within 10%! +7 points!")
+        elif difference <= 15:
+            points = 5
+            print(f"  👍 Fair! Within 15%! +5 points!")
+        elif difference <= 20:
+            points = 3
+            print(f"  👌 Close! Within 20%! +3 points!")
+        else:
+            points = 0
+            print(f"  ❌ Too far off. +0 points")
+        
+        total_points += points
+
+    print(f"\n{'='*60}")
+    print(f"🏆 TOTAL SCORE: {total_points}/{len(image_list) * 10} points")
+    print(f"{'='*60}")
+    
+    return total_points
+
+
+
+
+
+
+
+
+
+
+
+
 # -----------------------------------------------------------
 # LEADERBOARD
 # -----------------------------------------------------------
