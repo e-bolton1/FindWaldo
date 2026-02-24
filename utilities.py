@@ -179,7 +179,7 @@ def blur_attack(img_path, blur_strength):
     Apply blur attack to Waldo's detection area only.
     Returns detection results and scoring based on optimal blur threshold.
     """
-    MINIMUM_BLUR_THRESHOLD = 19  # Update this after running the test
+    MINIMUM_BLUR_THRESHOLD = 25  # Updated based on test results
     
     # Ensure blur strength is odd
     if blur_strength % 2 == 0:
@@ -220,18 +220,18 @@ def blur_attack(img_path, blur_strength):
     # Calculate score and message
     points = 0
     if len(dets) == 0:
-        # AI failed to detect blurred Waldo - score based on precision
+        # AI failed to detect blurred Waldo - score based on precision to blur 25
         if blur_strength == MINIMUM_BLUR_THRESHOLD:
             msg = f"PERFECT! Minimal Waldo blur at {blur_strength} - Optimal precision!"
             points = 10
-        elif MINIMUM_BLUR_THRESHOLD - 2 <= blur_strength <= MINIMUM_BLUR_THRESHOLD + 2:
-            msg = f"Excellent! Close to optimal Waldo blur at {blur_strength} (target: {MINIMUM_BLUR_THRESHOLD})"
+        elif 23 <= blur_strength <= 27:  # Within 2 of optimal (25)
+            msg = f"Excellent! Very close to optimal Waldo blur at {blur_strength} (target: {MINIMUM_BLUR_THRESHOLD})"
             points = 8
-        elif MINIMUM_BLUR_THRESHOLD - 5 <= blur_strength <= MINIMUM_BLUR_THRESHOLD + 5:
-            msg = f"Good Waldo blur at {blur_strength} - Getting close to optimal!"
+        elif 20 <= blur_strength <= 30:  # Within 5 of optimal (25)
+            msg = f"Good Waldo blur at {blur_strength} - Close to optimal (target: {MINIMUM_BLUR_THRESHOLD})"
             points = 6
         else:
-            msg = f"Waldo blur {blur_strength} worked but not optimal (target: ~{MINIMUM_BLUR_THRESHOLD})"
+            msg = f"Waldo blur {blur_strength} worked but not optimal (target: {MINIMUM_BLUR_THRESHOLD})"
             points = 4
     else:
         # AI still detected blurred Waldo
@@ -257,9 +257,11 @@ def blur_challenge_complete(blur_scores, blur_attempts):
         if attempt['points'] == 10:
             print(f"Attempt {i}: 🎯 PERFECT PRECISION! Blur {attempt['blur']} ({attempt['points']} pts)")
         elif attempt['points'] == 8:
-            print(f"Attempt {i}: ⭐ CLOSE TO OPTIMAL! Blur {attempt['blur']} ({attempt['points']} pts)")
+            print(f"Attempt {i}: ⭐ VERY CLOSE! Blur {attempt['blur']} ({attempt['points']} pts)")
         elif attempt['points'] == 6:
-            print(f"Attempt {i}: ✅ GOOD BREAK! Blur {attempt['blur']} ({attempt['points']} pts)")
+            print(f"Attempt {i}: ✅ CLOSE! Blur {attempt['blur']} ({attempt['points']} pts)")
+        elif attempt['points'] == 4:
+            print(f"Attempt {i}: ⚠️ BREAK BUT NOT OPTIMAL! Blur {attempt['blur']} ({attempt['points']} pts)")
         elif attempt['points'] == 2:
             print(f"Attempt {i}: 💪 AI SURVIVED Blur {attempt['blur']} ({attempt['points']} pts)")
     
@@ -269,7 +271,19 @@ def blur_challenge_complete(blur_scores, blur_attempts):
     successful_breaks = [a for a in blur_attempts if not a['detected']]
     if successful_breaks:
         min_successful = min(a['blur'] for a in successful_breaks)
-        print(f"✅ Minimum successful blur: {min_successful} (target: 19)")
+        print(f"✅ Minimum successful blur: {min_successful} (target: 25)")  # Changed from 19 to 25
+    
+    # Add final messages based on best score
+    if final_score == 10:
+        print("🎉 PERFECT! You found the exact minimal blur!")
+    elif final_score >= 8:
+        print("🌟 EXCELLENT! Very close to optimal!")
+    elif final_score >= 6:
+        print("👍 GOOD! Close to the target!")
+    elif final_score >= 4:
+        print("⚠️ You broke it but could be more precise!")
+    else:
+        print("💪 The AI was too resilient!")
     
     return final_score
 
