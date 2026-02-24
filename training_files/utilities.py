@@ -514,7 +514,7 @@ def waldo_sizing_challenge(base_x, base_y, waldo_image, bg_image):
             score += 1
             print(f"🎯 CONFIDENCE BONUS: +1 point for {max_confidence:.3f} confidence!")
     
-    print(f"\nFinal Score: {score}/15 points")
+    print(f"\nFinal Score: {score}/17 points")
     
     return score, results
 
