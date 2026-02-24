@@ -142,22 +142,30 @@ def scale_challenge_complete(attempt_scores):
     
     for i, score in enumerate(attempt_scores, 1):
         if score == 10:
-            print(f"Attempt {i}: 🎯 BROKE THE AI! ({score} pts)")
+            print(f"Attempt {i}: 🎯 PERFECT PRECISION! ({score} pts)")
+        elif score == 8:
+            print(f"Attempt {i}: ⭐ CLOSE TO OPTIMAL! ({score} pts)")
         elif score == 6:
-            print(f"Attempt {i}: ⚡ WEAKENED AI ({score} pts)")
-        elif score == 3:
+            print(f"Attempt {i}: ✅ GOOD BREAK! ({score} pts)")
+        elif score == 4:
+            print(f"Attempt {i}: ⚠️ OVERKILL BREAK! ({score} pts)")
+        elif score == 2:
             print(f"Attempt {i}: 💪 AI SURVIVED ({score} pts)")
         else:
-            print(f"Attempt {i}: No valid guess ({score} pts)")
+            print(f"Attempt {i}: Invalid attempt ({score} pts)")
     
     print(f"\n🏆 Best Score: {total_score}/10 points")
     
     if total_score == 10:
-        print("🎉 EXCELLENT! You successfully broke the AI!")
+        print("🎉 PERFECT! You found the optimal breaking point!")
+    elif total_score == 8:
+        print("🌟 EXCELLENT! Very close to the optimal scale!")
     elif total_score == 6:
-        print("👍 GOOD! You weakened the AI's confidence!")
+        print("👍 GOOD! You broke the AI effectively!")
+    elif total_score == 4:
+        print("⚠️ OVERKILL! You broke it but went too small - be more precise!")
     else:
-        print("💪 The AI proved resilient to your attacks!")
+        print("💪 The AI survived all your attempts!")
     
     return total_score
 
