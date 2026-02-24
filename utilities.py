@@ -105,16 +105,22 @@ def scale_guess(img_path, scale):
 
     if len(dets) == 0:
         msg = f"Guess {_scale_guesses_used}: AI couldn't find Wally at scale {scale}! You broke it!"
-        points = 10  # Broke the AI
+        points = 10  # Broke the AI completely
         return dets, ann, msg, points
     else:
         conf = dets[0][1]
-        if conf < 0.5:
-            msg = f"Guess {_scale_guesses_used}: AI weakened at {scale} (conf={conf:.2f}) - Low confidence!"
-            points = 6  # Weakened the AI
-        else:
-            msg = f"Guess {_scale_guesses_used}: AI survived at {scale} (conf={conf:.2f}) - Still confident"
-            points = 3  # AI survived
+        if scale <= 0.35 and conf > 0:  # Close to breaking point
+            msg = f"Guess {_scale_guesses_used}: Near breaking point at {scale} (conf={conf:.2f}) - Excellent!"
+            points = 8
+        elif conf < 0.5:  # Significantly weakened
+            msg = f"Guess {_scale_guesses_used}: AI weakened at {scale} (conf={conf:.2f}) - Good work!"
+            points = 6
+        elif conf < 0.9:  # Mildly weakened
+            msg = f"Guess {_scale_guesses_used}: AI slightly weakened at {scale} (conf={conf:.2f})"
+            points = 4
+        else:  # AI still strong
+            msg = f"Guess {_scale_guesses_used}: AI survived at {scale} (conf={conf:.2f}) - Still strong"
+            points = 2
         return dets, ann, msg, points
 
 def calculate_scale_final_score():
