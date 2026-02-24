@@ -280,13 +280,12 @@ def waldo_sizing_challenge(base_x, base_y, waldo_image, bg_image):
     
     print("🎯 Waldo Sizing Challenge!")
     print("Find the smallest Waldo HEIGHT the AI can still detect with >50% confidence")
-    print("You get 2 attempts. Valid range: 10-300 pixels")
-    print("(Based on testing: smallest successful = 40px, optimal = 110px)")
+    print("You get 3 attempts. Valid range: 10-300 pixels")
     print()
     
     results = []
     
-    for attempt in range(1, 3):
+    for attempt in range(1, 4):
         print(f"--- Attempt {attempt} ---")
         
         while True:
@@ -343,7 +342,7 @@ def waldo_sizing_challenge(base_x, base_y, waldo_image, bg_image):
         smallest_height = min(r['height'] for r in valid_results)
         smallest_confidence = min(r['confidence'] for r in valid_results if r['detected'])
         
-        print(f"✅ Smallest successful: {smallest_height}px (confidence: {smallest_confidence:.3f})")
+        print(f"✅ Smallest successful guess: {smallest_height}px (confidence: {smallest_confidence:.3f})")
         
         # UPDATED SCORING based on your test results:
         # 30px = impossible, 40px = possible, 50px+ = good confidence
@@ -361,7 +360,7 @@ def waldo_sizing_challenge(base_x, base_y, waldo_image, bg_image):
             print("👏 GREAT! Small Waldo detected - 8 points!")
         elif smallest_height <= 100:  # Medium range  
             score = 6
-            print("👍 GOOD! Medium Waldo detected - 6 points!")
+            print("👍 GOOD! Medium sized Waldo detected - 6 points!")
         elif smallest_height <= 130:  # Large but reasonable
             score = 4
             print("✅ OKAY! Large Waldo detected - 4 points!")
@@ -379,13 +378,6 @@ def waldo_sizing_challenge(base_x, base_y, waldo_image, bg_image):
             print(f"🎯 CONFIDENCE BONUS: +1 point for {max_confidence:.3f} confidence!")
     
     print(f"\nFinal Score: {score}/15 points")
-    
-    # Show how they compare to optimal
-    print("\n📊 COMPARISON TO OPTIMAL:")
-    print(f"• Theoretical minimum: 40px (0.880 confidence)")
-    print(f"• High confidence minimum: 50px (0.921 confidence)")  
-    print(f"• Optimal size: 110px (0.972 confidence)")
-    print(f"• Your smallest success: {min(r['height'] for r in valid_results) if valid_results else 'None'}px")
     
     return score, results
 
