@@ -97,9 +97,9 @@ Is it:
 ## 🏆 Scoring & Leaderboard
 
 Every challenge earns points for your team:
-- **Perfect strategy** = 10 points per challenge
-- **Close attempts** = 6-8 points
-- **Brave tries** = 2-4 points
+- **Perfect strategy** = Max points
+- **Close attempts** = Fewer points
+- **Brave tries** = Least points
 
 Your team's total score will be displayed on the **Slido leaderboard**!
 
