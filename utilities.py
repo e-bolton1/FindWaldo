@@ -90,7 +90,8 @@ def scale_guess(img_path, scale):
     global _scale_guesses_used, _SCALE_GUESS_LIMIT
 
     if _scale_guesses_used >= _SCALE_GUESS_LIMIT:
-        return None, None, "❌ No guesses left! (You only get 3).", 0
+        print("❌ You've used all 3 guesses!")
+        return [], None, "No more guesses", 0
 
     _scale_guesses_used += 1
 
@@ -106,16 +107,16 @@ def scale_guess(img_path, scale):
     if len(dets) == 0:
         # AI broken - score based on how close to optimal breaking point (0.32)
         if 0.30 <= scale <= 0.33:
-            msg = f"Guess {_scale_guesses_used}: PERFECT! Minimal scale break at {scale} - Optimal strategy!"
+            msg = f"🎯 PERFECT! AI broken at {scale} - Optimal breaking point!"
             points = 10
         elif 0.28 <= scale <= 0.35:
-            msg = f"Guess {_scale_guesses_used}: Excellent! Close to optimal break at {scale}"
+            msg = f"⭐ EXCELLENT! AI broken at {scale} - Very close to optimal!"
             points = 8
         elif 0.25 <= scale <= 0.40:
-            msg = f"Guess {_scale_guesses_used}: Good break at {scale} - Could be more precise"
+            msg = f"👍 GOOD! AI broken at {scale} - Effective!"
             points = 6
-        else:  # Too small (overkill)
-            msg = f"Guess {_scale_guesses_used}: Overkill break at {scale} - Too easy!"
+        else:
+            msg = f"⚠️ AI broken at {scale} - But too small (overkill)!"
             points = 4
         return dets, ann, msg, points
     else:
