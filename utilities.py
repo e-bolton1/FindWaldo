@@ -104,23 +104,25 @@ def scale_guess(img_path, scale):
     dets, ann, _ = detect_wally(temp)
 
     if len(dets) == 0:
-        msg = f"Guess {_scale_guesses_used}: AI couldn't find Wally at scale {scale}! You broke it!"
-        points = 10  # Broke the AI completely
+        # AI broken - score based on how close to optimal breaking point (0.32)
+        if 0.30 <= scale <= 0.33:
+            msg = f"Guess {_scale_guesses_used}: PERFECT! Minimal scale break at {scale} - Optimal strategy!"
+            points = 10
+        elif 0.28 <= scale <= 0.35:
+            msg = f"Guess {_scale_guesses_used}: Excellent! Close to optimal break at {scale}"
+            points = 8
+        elif 0.25 <= scale <= 0.40:
+            msg = f"Guess {_scale_guesses_used}: Good break at {scale} - Could be more precise"
+            points = 6
+        else:  # Too small (overkill)
+            msg = f"Guess {_scale_guesses_used}: Overkill break at {scale} - Too easy!"
+            points = 4
         return dets, ann, msg, points
     else:
+        # AI survived
         conf = dets[0][1]
-        if scale <= 0.35 and conf > 0:  # Close to breaking point
-            msg = f"Guess {_scale_guesses_used}: Near breaking point at {scale} (conf={conf:.2f}) - Excellent!"
-            points = 8
-        elif conf < 0.5:  # Significantly weakened
-            msg = f"Guess {_scale_guesses_used}: AI weakened at {scale} (conf={conf:.2f}) - Good work!"
-            points = 6
-        elif conf < 0.9:  # Mildly weakened
-            msg = f"Guess {_scale_guesses_used}: AI slightly weakened at {scale} (conf={conf:.2f})"
-            points = 4
-        else:  # AI still strong
-            msg = f"Guess {_scale_guesses_used}: AI survived at {scale} (conf={conf:.2f}) - Still strong"
-            points = 2
+        msg = f"Guess {_scale_guesses_used}: AI survived at {scale} (conf={conf:.2f}) - Try smaller!"
+        points = 2
         return dets, ann, msg, points
 
 def calculate_scale_final_score():
