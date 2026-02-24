@@ -189,7 +189,7 @@ def blur_attack(img_path, blur_strength):
     # First, find Waldo in the original image
     original_dets, _, _ = detect_wally(img_path)
     if len(original_dets) == 0:
-        return [], None, "Could not find Waldo in original image to blur", 0
+        return [], None, "Could not find Wally in original image to blur", 0
     
     # Load image
     img = cv2.imread(img_path)
@@ -206,7 +206,7 @@ def blur_attack(img_path, blur_strength):
     
     # Check if region is valid
     if waldo_region.size == 0:
-        return [], None, "Error: Invalid Waldo region", 0
+        return [], None, "Error: Invalid Wally region", 0
     
     blurred_waldo = cv2.GaussianBlur(waldo_region, (blur_strength, blur_strength), 0)
     blurred_img[y1:y2, x1:x2] = blurred_waldo
@@ -222,7 +222,7 @@ def blur_attack(img_path, blur_strength):
     if len(dets) == 0:
         # AI failed to detect blurred Waldo - SUCCESS! Score based on precision to blur 25
         if blur_strength == MINIMUM_BLUR_THRESHOLD:
-            msg = f"PERFECT! Optimal Waldo blur at {blur_strength} - AI broken with precision!"
+            msg = f"PERFECT! Optimal Wally blur at {blur_strength} - AI broken with precision!"
             points = 10
         elif 23 <= blur_strength <= 27:  # Within 2 of optimal (25)
             msg = f"Excellent! AI broken with blur {blur_strength} - Very close to optimal "
@@ -236,7 +236,7 @@ def blur_attack(img_path, blur_strength):
     else:
         # AI still detected blurred Waldo - FAILURE
         conf = dets[0][1]
-        msg = f"AI survived Waldo blur {blur_strength} (confidence: {conf:.2f}) - Try stronger blur!"
+        msg = f"AI survived Wally blur {blur_strength} (confidence: {conf:.2f}) - Try stronger blur!"
         points = 2
     
     return dets, ann, msg, points
