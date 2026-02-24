@@ -227,6 +227,31 @@ def _make_temp_image_from_array(img_array):
         cv2.imwrite(tmp.name, img_array)
         return tmp.name
 
+# Calculate final score
+def blur_challenge_complete(blur_scores, blur_attempts):
+    print("\n🏆 BLUR ATTACK RESULTS:")
+    print("-" * 40)
+    
+    for i, attempt in enumerate(blur_attempts, 1):
+        if attempt['points'] == 10:
+            print(f"Attempt {i}: 🎯 PERFECT PRECISION! Blur {attempt['blur']} ({attempt['points']} pts)")
+        elif attempt['points'] == 8:
+            print(f"Attempt {i}: ⭐ CLOSE TO OPTIMAL! Blur {attempt['blur']} ({attempt['points']} pts)")
+        elif attempt['points'] == 6:
+            print(f"Attempt {i}: ✅ GOOD BREAK! Blur {attempt['blur']} ({attempt['points']} pts)")
+        elif attempt['points'] == 2:
+            print(f"Attempt {i}: 💪 AI SURVIVED Blur {attempt['blur']} ({attempt['points']} pts)")
+    
+    final_score = max(blur_scores)
+    print(f"\n🏆 Best Score: {final_score}/10 points")
+    
+    successful_breaks = [a for a in blur_attempts if not a['detected']]
+    if successful_breaks:
+        min_successful = min(a['blur'] for a in successful_breaks)
+        print(f"✅ Minimum successful blur: {min_successful} (target: 19)")
+    
+    return final_score
+
 
 # -----------------------------------------------------------
 # AUGMENTATIONS
