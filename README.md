@@ -1,6 +1,6 @@
 # 🎯 Where's Wally? Break the AI Challenge!
 
-![Wally](images/finding_waldo/waldo.png)
+<img src="images/finding_waldo/waldo.png" alt="Wally" width="80" style="opacity: 0.2; position: absolute; top: 20px; right: 20px;"/>
 
 **Can YOU outsmart an AI trained to find Wally?**
 
