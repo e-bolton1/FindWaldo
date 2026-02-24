@@ -415,8 +415,8 @@ def evaluate_ranking_predictions(image_list, predicted_confidences):
 def waldo_sizing_challenge(base_x, base_y, waldo_image, bg_image):
     """Interactive challenge to find the smallest Waldo the AI can detect"""
     
-    print("🎯 Waldo Sizing Challenge!")
-    print("Find the smallest Waldo HEIGHT the AI can still detect with >50% confidence")
+    print("🎯 Wally Sizing Challenge!")
+    print("Find the smallest Wally HEIGHT the AI can still detect with >50% confidence")
     print("You get 3 attempts. Valid range: 10-300 pixels")
     print()
     
@@ -427,7 +427,7 @@ def waldo_sizing_challenge(base_x, base_y, waldo_image, bg_image):
         
         while True:
             try:
-                height = int(input(f"Enter Waldo HEIGHT (10-300): "))
+                height = int(input(f"Enter Wally HEIGHT (10-300): "))
                 if 10 <= height <= 300:
                     break
                 print(f"❌ Must be between 10-300 pixels!")
@@ -491,19 +491,19 @@ def waldo_sizing_challenge(base_x, base_y, waldo_image, bg_image):
             print("🌟 INCREDIBLE! Minimum viable size - 12 points!")
         elif smallest_height <= 50:  # 30x50px (first >90% confidence)
             score = 10
-            print("🎉 EXCELLENT! High-confidence small Waldo - 10 points!")
+            print("🎉 EXCELLENT! High-confidence small Wally - 10 points!")
         elif smallest_height <= 70:  # Good range
             score = 8
-            print("👏 GREAT! Small Waldo detected - 8 points!")
+            print("👏 GREAT! Small Wally detected - 8 points!")
         elif smallest_height <= 100:  # Medium range  
             score = 6
-            print("👍 GOOD! Medium sized Waldo detected - 6 points!")
+            print("👍 GOOD! Medium sized Wally detected - 6 points!")
         elif smallest_height <= 130:  # Large but reasonable
             score = 4
-            print("✅ OKAY! Large Waldo detected - 4 points!")
+            print("✅ OKAY! Large Wally detected - 4 points!")
         else:  # Very large
             score = 2
-            print("📏 Only very large Waldo detected - 2 points!")
+            print("📏 Only very large Wally detected - 2 points!")
         
         # BONUS for high confidence
         max_confidence = max(r['confidence'] for r in valid_results)
