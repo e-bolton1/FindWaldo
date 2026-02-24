@@ -225,13 +225,13 @@ def blur_attack(img_path, blur_strength):
             msg = f"PERFECT! Minimal Waldo blur at {blur_strength} - Optimal precision!"
             points = 10
         elif 23 <= blur_strength <= 27:  # Within 2 of optimal (25)
-            msg = f"Excellent! Very close to optimal Waldo blur at {blur_strength} (target: {MINIMUM_BLUR_THRESHOLD})"
+            msg = f"Excellent! Very close to optimal Waldo blur at {blur_strength}"
             points = 8
         elif 20 <= blur_strength <= 30:  # Within 5 of optimal (25)
-            msg = f"Good Waldo blur at {blur_strength} - Close to optimal (target: {MINIMUM_BLUR_THRESHOLD})"
+            msg = f"Good Waldo blur at {blur_strength} - Close to optimal"
             points = 6
         else:
-            msg = f"Waldo blur {blur_strength} worked but not optimal (target: {MINIMUM_BLUR_THRESHOLD})"
+            msg = f"Waldo blur {blur_strength} worked but not optimal"
             points = 4
     else:
         # AI still detected blurred Waldo
