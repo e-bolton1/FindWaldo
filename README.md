@@ -1,6 +1,8 @@
 # 🎯 Where's Wally? Break the AI Challenge!
 
-<img src="images/finding_waldo/waldo.png" alt="Wally" width="80" style="opacity: 0.2; position: absolute; top: 20px; right: 20px;"/>
+<p align="center">
+  <img src="images/finding_waldo/waldo.png" alt="Where's Wally" width="60" style="opacity: 0.15;"/>
+</p>
 
 **Can YOU outsmart an AI trained to find Wally?**
 
