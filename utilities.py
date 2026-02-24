@@ -90,7 +90,7 @@ def scale_guess(img_path, scale):
     global _scale_guesses_used, _SCALE_GUESS_LIMIT
 
     if _scale_guesses_used >= _SCALE_GUESS_LIMIT:
-        return None, None, "❌ No guesses left! (You only get 3)."
+        return None, None, "❌ No guesses left! (You only get 3).", 0
 
     _scale_guesses_used += 1
 
@@ -105,11 +105,53 @@ def scale_guess(img_path, scale):
 
     if len(dets) == 0:
         msg = f"Guess {_scale_guesses_used}: AI couldn't find Wally at scale {scale}! You broke it!"
-        return dets, ann, msg
+        points = 10  # Broke the AI
+        return dets, ann, msg, points
     else:
         conf = dets[0][1]
-        msg = f"Guess {_scale_guesses_used}: AI detected something at {scale} (conf={conf:.2f})"
-        return dets, ann, msg
+        if conf < 0.5:
+            msg = f"Guess {_scale_guesses_used}: AI weakened at {scale} (conf={conf:.2f}) - Low confidence!"
+            points = 6  # Weakened the AI
+        else:
+            msg = f"Guess {_scale_guesses_used}: AI survived at {scale} (conf={conf:.2f}) - Still confident"
+            points = 3  # AI survived
+        return dets, ann, msg, points
+
+def calculate_scale_final_score():
+    """Call this after all 3 guesses to get the final score"""
+    # This gets called from the notebook to sum up all attempts
+    pass
+
+def scale_challenge_complete(attempt_scores):
+    """
+    Calculate final score for scale challenge.
+    attempt_scores: list of points from each attempt
+    """
+    total_score = max(attempt_scores)  # Take the best single attempt
+    
+    print("\n🏆 SCALE CHALLENGE RESULTS:")
+    print("-" * 40)
+    
+    for i, score in enumerate(attempt_scores, 1):
+        if score == 10:
+            print(f"Attempt {i}: 🎯 BROKE THE AI! ({score} pts)")
+        elif score == 6:
+            print(f"Attempt {i}: ⚡ WEAKENED AI ({score} pts)")
+        elif score == 3:
+            print(f"Attempt {i}: 💪 AI SURVIVED ({score} pts)")
+        else:
+            print(f"Attempt {i}: No valid guess ({score} pts)")
+    
+    print(f"\n🏆 Best Score: {total_score}/10 points")
+    
+    if total_score == 10:
+        print("🎉 EXCELLENT! You successfully broke the AI!")
+    elif total_score == 6:
+        print("👍 GOOD! You weakened the AI's confidence!")
+    else:
+        print("💪 The AI proved resilient to your attacks!")
+    
+    return total_score
 
 
 # -----------------------------------------------------------
