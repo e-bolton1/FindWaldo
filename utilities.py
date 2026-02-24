@@ -214,7 +214,7 @@ def blur_attack(img_path, blur_strength):
     temp_path = _make_temp_image_from_array(blurred_img)
     
     # Run detection on image with blurred Waldo
-    dets, ann, _ = detect_waldo(temp_path)
+    dets, ann, _ = detect_wally(temp_path)
     os.unlink(temp_path)  # Clean up
     
     # Calculate score and message
