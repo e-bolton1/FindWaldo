@@ -214,29 +214,29 @@ def blur_attack(img_path, blur_strength):
     temp_path = _make_temp_image_from_array(blurred_img)
     
     # Run detection on image with blurred Waldo
-    dets, ann, _ = detect_wally(temp_path)
+    dets, ann, _ = detect_waldo(temp_path)
     os.unlink(temp_path)  # Clean up
     
     # Calculate score and message
     points = 0
     if len(dets) == 0:
-        # AI failed to detect blurred Waldo - score based on precision to blur 25
+        # AI failed to detect blurred Waldo - SUCCESS! Score based on precision to blur 25
         if blur_strength == MINIMUM_BLUR_THRESHOLD:
-            msg = f"PERFECT! Minimal Waldo blur at {blur_strength} - Optimal precision!"
+            msg = f"PERFECT! Optimal Waldo blur at {blur_strength} - AI broken with precision!"
             points = 10
         elif 23 <= blur_strength <= 27:  # Within 2 of optimal (25)
-            msg = f"Excellent! Very close to optimal Waldo blur at {blur_strength}"
+            msg = f"Excellent! AI broken with blur {blur_strength} - Very close to optimal ({MINIMUM_BLUR_THRESHOLD})"
             points = 8
         elif 20 <= blur_strength <= 30:  # Within 5 of optimal (25)
-            msg = f"Good Waldo blur at {blur_strength} - Close to optimal"
+            msg = f"Good! AI broken with blur {blur_strength} - Close to optimal ({MINIMUM_BLUR_THRESHOLD})"
             points = 6
         else:
-            msg = f"Waldo blur {blur_strength} worked but not optimal"
+            msg = f"Success! AI broken with blur {blur_strength} but could be more precise (optimal: {MINIMUM_BLUR_THRESHOLD})"
             points = 4
     else:
-        # AI still detected blurred Waldo
+        # AI still detected blurred Waldo - FAILURE
         conf = dets[0][1]
-        msg = f"AI survived Waldo blur {blur_strength} (confidence: {conf:.2f}) - Try stronger!"
+        msg = f"AI survived Waldo blur {blur_strength} (confidence: {conf:.2f}) - Try stronger blur!"
         points = 2
     
     return dets, ann, msg, points
