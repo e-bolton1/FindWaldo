@@ -174,40 +174,58 @@ def scale_challenge_complete(attempt_scores):
 # OCCLUSION / BLUR ATTACK
 # -----------------------------------------------------------
 
-def blur_attack(img_path, blur_strength=51):
+def blur_attack(img_path, blur_strength):
     """
-    Automatically detects Wally, then applies a blur on top of him.
+    Apply blur attack to Wally detection area.
+    Returns detection results and scoring based on optimal blur threshold.
+    """
+    MINIMUM_BLUR_THRESHOLD = 19  # Empirically determined breaking point
     
-    Args:
-        blur_strength: Intensity of blur (must be odd number, higher = more blur)
-    """
-    dets, ann, _ = detect_wally(img_path)
-    if len(dets) == 0:
-        return None, None, "⚠️ Wally not detected in the base image."
-
-    (x1,y1,x2,y2), score, _ = dets[0]
-    cx, cy = int((x1+x2)/2), int((y1+y2)/2)
-
-    # Load image for blurring
-    img = cv2.imread(img_path)
-    H, W = img.shape[:2]
-
-    size = 60  # fixed region size
-    bx1, by1 = max(0, cx-size), max(0, cy-size)
-    bx2, by2 = min(W, cx+size), min(H, cy+size)
-
-    attacked = img.copy()
-    # Ensure blur_strength is odd
+    # Ensure blur strength is odd
     if blur_strength % 2 == 0:
         blur_strength += 1
-    attacked[by1:by2, bx1:bx2] = cv2.GaussianBlur(attacked[by1:by2, bx1:bx2], (blur_strength, blur_strength), 0)
+        print(f"Adjusted to odd number: {blur_strength}")
+    
+    # Load image
+    img = cv2.imread(img_path)
+    if img is None:
+        return [], None, "Error: Could not load image", 0
+    
+    # Apply blur to entire image (simulating blur attack on Wally area)
+    blurred = cv2.GaussianBlur(img, (blur_strength, blur_strength), 0)
+    temp_path = _make_temp_image_from_array(blurred)
+    
+    # Run detection
+    dets, ann, _ = detect_wally(temp_path)
+    os.unlink(temp_path)  # Clean up
+    
+    # Calculate score and message
+    points = 0
+    if len(dets) == 0:
+        # AI failed to detect - score based on how close to minimum
+        if blur_strength == MINIMUM_BLUR_THRESHOLD:
+            msg = f"PERFECT! Minimal blur break at {blur_strength} - Optimal precision!"
+            points = 10
+        elif MINIMUM_BLUR_THRESHOLD - 5 <= blur_strength <= MINIMUM_BLUR_THRESHOLD + 5:
+            msg = f"Excellent! Close to optimal blur at {blur_strength}"
+            points = 8
+        else:
+            msg = f"Good break at {blur_strength} but not optimal (target: ~{MINIMUM_BLUR_THRESHOLD})"
+            points = 6
+    else:
+        # AI still detected Wally
+        conf = dets[0][1]
+        msg = f"AI survived blur {blur_strength} (confidence: {conf:.2f}) - Try stronger blur!"
+        points = 2
+    
+    return dets, ann, msg, points
 
-    temp = os.path.join(_temp_dir, f"wally_blur_{uuid.uuid4()}.jpg")
-    cv2.imwrite(temp, attacked)
-
-    dets2, ann2, _ = detect_wally(temp)
-    after_conf = dets2[0][1] if len(dets2) > 0 else 0
-    return dets2, ann2, f"Blur attack (strength={blur_strength}). Before: {score:.2f}, After: {after_conf:.2f}"
+def _make_temp_image_from_array(img_array):
+    """Helper to save opencv array as temporary image"""
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
+        cv2.imwrite(tmp.name, img_array)
+        return tmp.name
 
 
 # -----------------------------------------------------------
