@@ -1,5 +1,7 @@
 # 🎯 Where's Wally? Break the AI Challenge!
 
+![Wally](images/finding_waldo/waldo.png)
+
 **Can YOU outsmart an AI trained to find Wally?**
 
 Welcome to the ultimate AI challenge! You'll be like a hacker, trying to trick a computer vision AI that thinks it's an expert at finding Wally. Your mission: make Wally invisible to the AI using shrinking, blurring, and other sneaky tricks!
