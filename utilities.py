@@ -275,13 +275,13 @@ def evaluate_ranking_predictions(image_list, predicted_confidences):
 # Make different sizes of Waldo for scale-breaking game
 # -----------------------------------------------------------
 
-def waldo_sizing_challenge(base_x, base_y, waldo_sprite, bg_full):
+def waldo_sizing_challenge(base_x, base_y, waldo_image, bg_image):
     """Interactive challenge to find the smallest Waldo the AI can detect"""
     
     print("🎯 Waldo Sizing Challenge!")
-    print("Find the smallest Waldo HEIGHT the AI can still detect with >90% confidence")
+    print("Find the smallest Waldo HEIGHT the AI can still detect with >50% confidence")
     print("You get 2 attempts. Valid range: 10-300 pixels")
-    print("(Width automatically calculated to maintain proportions)")
+    print("(Based on testing: smallest successful = 40px, optimal = 110px)")
     print()
     
     results = []
@@ -289,7 +289,6 @@ def waldo_sizing_challenge(base_x, base_y, waldo_sprite, bg_full):
     for attempt in range(1, 3):
         print(f"--- Attempt {attempt} ---")
         
-        # Get height input from user
         while True:
             try:
                 height = int(input(f"Enter Waldo HEIGHT (10-300): "))
@@ -299,63 +298,95 @@ def waldo_sizing_challenge(base_x, base_y, waldo_sprite, bg_full):
             except ValueError:
                 print("❌ Please enter a valid number!")
         
-        # Calculate proportional width
+        # Calculate proportional width and create image
         width = int(height * 0.6)
-        
-        # Create new image with resized Waldo
-        bg = bg_full.copy()
-        waldo_resized = waldo_sprite.resize((width, height), Image.LANCZOS)
+        bg = bg_image.copy()
+        waldo_resized = waldo_image.resize((width, height), Image.LANCZOS)
         bg.paste(waldo_resized, (base_x, base_y), waldo_resized)
         
-        # Test this new image with YOLO model
-        dets, annotated, msg = detect_wally(bg)  # This runs YOLO on the new image
-        confidence = dets[0][1] if len(dets) > 0 else 0  # Extract confidence score
+        # Test with YOLO
+        dets, annotated, msg = detect_wally(bg)
+        confidence = dets[0][1] if len(dets) > 0 else 0
         
-        # Store results
         results.append({
             'height': height,
             'width': width, 
             'confidence': confidence,
-            'detected': confidence > 0.9
+            'detected': confidence > 0.5  # Lowered threshold based on your data
         })
         
-        # Display the annotated result
         show(annotated, f"Attempt {attempt}: Waldo {width}x{height}px")
-        status = "✅ DETECTED" if confidence > 0.9 else "❌ TOO SMALL"
-        print(f"Waldo Size: {width}x{height}px | YOLO Confidence: {confidence:.3f} | {status}")
+        
+        # Better status logic that considers both too small AND too large
+        if confidence > 0.5:
+            status = "✅ DETECTED"
+        elif height < 40:  # Based on your test data - minimum viable size
+            status = "❌ TOO SMALL"
+        elif height > 200:  # Set a reasonable upper limit
+            status = "⚠️ TOO LARGE"
+        else:
+            status = "❌ NOT DETECTED"
+        
+        print(f"Size: {width}x{height}px | Confidence: {confidence:.3f} | {status}")
         print()
     
-    # Calculate final score based on smallest successful detection
+    # ENHANCED SCORING based on your optimal data
     print("🏆 FINAL SCORING:")
-    print("-" * 40)
+    print("-" * 50)
     
     valid_results = [r for r in results if r['detected']]
     
     if not valid_results:
-        print("❌ YOLO failed to detect any Waldo - 0 points")
+        print("❌ No successful detections - 0 points")
         score = 0
     else:
         smallest_height = min(r['height'] for r in valid_results)
-        print(f"✅ Smallest Waldo YOLO detected: {smallest_height}px height")
+        smallest_confidence = min(r['confidence'] for r in valid_results if r['detected'])
         
-        # Score based on how small they got it while maintaining >90% confidence
-        if smallest_height <= 40:
+        print(f"✅ Smallest successful: {smallest_height}px (confidence: {smallest_confidence:.3f})")
+        
+        # UPDATED SCORING based on your test results:
+        # 30px = impossible, 40px = possible, 50px+ = good confidence
+        if smallest_height <= 35:
+            score = 15  # Bonus for near-impossible detection
+            print("🚀 LEGENDARY! Sub-40px detection - 15 points!")
+        elif smallest_height <= 40:  # At the limit (24x40px from test)
+            score = 12
+            print("🌟 INCREDIBLE! Minimum viable size - 12 points!")
+        elif smallest_height <= 50:  # 30x50px (first >90% confidence)
             score = 10
-            print("🌟 INCREDIBLE! Tiny Waldo detected by YOLO - 10 points!")
-        elif smallest_height <= 60:
-            score = 8  
-            print("🎉 EXCELLENT! Small Waldo detected by YOLO - 8 points!")
-        elif smallest_height <= 80:
+            print("🎉 EXCELLENT! High-confidence small Waldo - 10 points!")
+        elif smallest_height <= 70:  # Good range
+            score = 8
+            print("👏 GREAT! Small Waldo detected - 8 points!")
+        elif smallest_height <= 100:  # Medium range  
             score = 6
-            print("👍 GOOD! Medium Waldo detected by YOLO - 6 points!")
-        elif smallest_height <= 100:
+            print("👍 GOOD! Medium Waldo detected - 6 points!")
+        elif smallest_height <= 130:  # Large but reasonable
             score = 4
-            print("✅ DECENT! Large Waldo detected by YOLO - 4 points!")
-        else:
+            print("✅ OKAY! Large Waldo detected - 4 points!")
+        else:  # Very large
             score = 2
-            print("📏 Only very large Waldo detected by YOLO - 2 points!")
+            print("📏 Only very large Waldo detected - 2 points!")
+        
+        # BONUS for high confidence
+        max_confidence = max(r['confidence'] for r in valid_results)
+        if max_confidence > 0.95:
+            score += 2
+            print(f"🎯 CONFIDENCE BONUS: +2 points for {max_confidence:.3f} confidence!")
+        elif max_confidence > 0.90:
+            score += 1
+            print(f"🎯 CONFIDENCE BONUS: +1 point for {max_confidence:.3f} confidence!")
     
-    print(f"\nFinal Score: {score}/10 points")
+    print(f"\nFinal Score: {score}/15 points")
+    
+    # Show how they compare to optimal
+    print("\n📊 COMPARISON TO OPTIMAL:")
+    print(f"• Theoretical minimum: 40px (0.880 confidence)")
+    print(f"• High confidence minimum: 50px (0.921 confidence)")  
+    print(f"• Optimal size: 110px (0.972 confidence)")
+    print(f"• Your smallest success: {min(r['height'] for r in valid_results) if valid_results else 'None'}px")
+    
     return score, results
 
 
