@@ -176,46 +176,67 @@ def scale_challenge_complete(attempt_scores):
 
 def blur_attack(img_path, blur_strength):
     """
-    Apply blur attack to Wally detection area.
+    Apply blur attack to Waldo's detection area only.
     Returns detection results and scoring based on optimal blur threshold.
     """
-    MINIMUM_BLUR_THRESHOLD = 19  # Empirically determined breaking point
+    MINIMUM_BLUR_THRESHOLD = 19  # Update this after running the test
     
     # Ensure blur strength is odd
     if blur_strength % 2 == 0:
         blur_strength += 1
         print(f"Adjusted to odd number: {blur_strength}")
     
+    # First, find Waldo in the original image
+    original_dets, _, _ = detect_wally(img_path)
+    if len(original_dets) == 0:
+        return [], None, "Could not find Waldo in original image to blur", 0
+    
     # Load image
     img = cv2.imread(img_path)
     if img is None:
         return [], None, "Error: Could not load image", 0
     
-    # Apply blur to entire image (simulating blur attack on Wally area)
-    blurred = cv2.GaussianBlur(img, (blur_strength, blur_strength), 0)
-    temp_path = _make_temp_image_from_array(blurred)
+    # Get Waldo's bounding box and blur only that region
+    waldo_box = original_dets[0][0]  # [x1, y1, x2, y2]
+    x1, y1, x2, y2 = map(int, waldo_box)
     
-    # Run detection
+    # Create copy and blur only Waldo region
+    blurred_img = img.copy()
+    waldo_region = blurred_img[y1:y2, x1:x2]
+    
+    # Check if region is valid
+    if waldo_region.size == 0:
+        return [], None, "Error: Invalid Waldo region", 0
+    
+    blurred_waldo = cv2.GaussianBlur(waldo_region, (blur_strength, blur_strength), 0)
+    blurred_img[y1:y2, x1:x2] = blurred_waldo
+    
+    temp_path = _make_temp_image_from_array(blurred_img)
+    
+    # Run detection on image with blurred Waldo
     dets, ann, _ = detect_wally(temp_path)
     os.unlink(temp_path)  # Clean up
     
     # Calculate score and message
     points = 0
     if len(dets) == 0:
-        # AI failed to detect - score based on how close to minimum
+        # AI failed to detect blurred Waldo - score based on precision
         if blur_strength == MINIMUM_BLUR_THRESHOLD:
-            msg = f"PERFECT! Minimal blur break at {blur_strength} - Optimal precision!"
+            msg = f"PERFECT! Minimal Waldo blur at {blur_strength} - Optimal precision!"
             points = 10
-        elif MINIMUM_BLUR_THRESHOLD - 5 <= blur_strength <= MINIMUM_BLUR_THRESHOLD + 5:
-            msg = f"Excellent! Close to optimal blur at {blur_strength}"
+        elif MINIMUM_BLUR_THRESHOLD - 2 <= blur_strength <= MINIMUM_BLUR_THRESHOLD + 2:
+            msg = f"Excellent! Close to optimal Waldo blur at {blur_strength} (target: {MINIMUM_BLUR_THRESHOLD})"
             points = 8
-        else:
-            msg = f"Good break at {blur_strength} but not optimal (target: ~{MINIMUM_BLUR_THRESHOLD})"
+        elif MINIMUM_BLUR_THRESHOLD - 5 <= blur_strength <= MINIMUM_BLUR_THRESHOLD + 5:
+            msg = f"Good Waldo blur at {blur_strength} - Getting close to optimal!"
             points = 6
+        else:
+            msg = f"Waldo blur {blur_strength} worked but not optimal (target: ~{MINIMUM_BLUR_THRESHOLD})"
+            points = 4
     else:
-        # AI still detected Wally
+        # AI still detected blurred Waldo
         conf = dets[0][1]
-        msg = f"AI survived blur {blur_strength} (confidence: {conf:.2f}) - Try stronger blur!"
+        msg = f"AI survived Waldo blur {blur_strength} (confidence: {conf:.2f}) - Try stronger!"
         points = 2
     
     return dets, ann, msg, points
