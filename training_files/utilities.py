@@ -86,6 +86,15 @@ def scale_guess(img_path, scale):
     Student-only API.
     Students get ONLY 3 attempts.
     They pass a scale (e.g., 0.5), and we test detection.
+    
+    NEW SCORING (0.2 is the critical breaking point):
+    - Scale >= 0.2: AI survives = 2 points
+    - Scale < 0.2: AI breaks, points based on proximity to 0.2
+      - 0.19-0.20: 10 points (PERFECT - exactly at threshold)
+      - 0.15-0.189: 9 points (VERY CLOSE to optimal)
+      - 0.10-0.149: 8 points (CLOSE to optimal)
+      - 0.05-0.099: 6 points (GOOD break but not optimal)
+      - Below 0.05: 4 points (OVERKILL - went too small)
     """
     global _scale_guesses_used, _SCALE_GUESS_LIMIT
 
@@ -105,18 +114,21 @@ def scale_guess(img_path, scale):
     dets, ann, _ = detect_wally(temp)
 
     if len(dets) == 0:
-        # AI broken - score based on how close to optimal breaking point (0.32)
-        if 0.30 <= scale <= 0.33:
-            msg = f"🎯 PERFECT! AI broken at {scale} - Optimal breaking point!"
+        # AI broken - score based on how close to critical breaking point (0.2)
+        if 0.19 <= scale < 0.21:
+            msg = f"🎯 PERFECT! AI broken at {scale} - Exactly at the critical threshold!"
             points = 10
-        elif 0.28 <= scale <= 0.35:
+        elif 0.15 <= scale < 0.19:
             msg = f"⭐ EXCELLENT! AI broken at {scale} - Very close to optimal!"
+            points = 9
+        elif 0.10 <= scale < 0.15:
+            msg = f"👍 GOOD! AI broken at {scale} - Close to optimal!"
             points = 8
-        elif 0.25 <= scale <= 0.40:
-            msg = f"👍 GOOD! AI broken at {scale} - Effective!"
+        elif 0.05 <= scale < 0.10:
+            msg = f"✅ NICE! AI broken at {scale} - Good break but not precise!"
             points = 6
-        else:
-            msg = f"⚠️ AI broken at {scale} - But too small (overkill)!"
+        else:  # Below 0.05
+            msg = f"⚠️ AI broken at {scale} - Overkill! You went too small!"
             points = 4
         return dets, ann, msg, points
     else:
@@ -143,13 +155,15 @@ def scale_challenge_complete(attempt_scores):
     
     for i, score in enumerate(attempt_scores, 1):
         if score == 10:
-            print(f"Attempt {i}: 🎯 PERFECT PRECISION! ({score} pts)")
+            print(f"Attempt {i}: 🎯 PERFECT! ({score} pts)")
+        elif score == 9:
+            print(f"Attempt {i}: ⭐ EXCELLENT! ({score} pts)")
         elif score == 8:
-            print(f"Attempt {i}: ⭐ CLOSE TO OPTIMAL! ({score} pts)")
+            print(f"Attempt {i}: 👍 GOOD! ({score} pts)")
         elif score == 6:
-            print(f"Attempt {i}: ✅ GOOD BREAK! ({score} pts)")
+            print(f"Attempt {i}: ✅ NICE BREAK! ({score} pts)")
         elif score == 4:
-            print(f"Attempt {i}: ⚠️ OVERKILL BREAK! ({score} pts)")
+            print(f"Attempt {i}: ⚠️ OVERKILL! ({score} pts)")
         elif score == 2:
             print(f"Attempt {i}: 💪 AI SURVIVED ({score} pts)")
         else:
@@ -158,13 +172,15 @@ def scale_challenge_complete(attempt_scores):
     print(f"\n🏆 Best Score: {total_score}/10 points")
     
     if total_score == 10:
-        print("🎉 PERFECT! You found the optimal breaking point!")
+        print("🎉 PERFECT! You found the exact critical breaking point!")
+    elif total_score == 9:
+        print("🌟 EXCELLENT! Very close to the critical threshold!")
     elif total_score == 8:
-        print("🌟 EXCELLENT! Very close to the optimal scale!")
+        print("👍 GOOD! You broke the AI close to the target!")
     elif total_score == 6:
-        print("👍 GOOD! You broke the AI effectively!")
+        print("✅ NICE! You broke the AI but could be more precise!")
     elif total_score == 4:
-        print("⚠️ OVERKILL! You broke it but went too small - be more precise!")
+        print("⚠️ OVERKILL! You broke it but went way too small - be more strategic!")
     else:
         print("💪 The AI survived all your attempts!")
     
