@@ -22,21 +22,32 @@ Think of it like a game where you're finding the AI's weaknesses. The smaller yo
 
 ## 🚀 How to Get Started
 
-### Step 1: Open VS Code
+### Step 1: Download the Files
+1. Go to the **GitHub repository** link provided
+2. Click the green **"Code"** button
+3. Select **"Download ZIP"**
+4. Wait for the download to finish
+
+### Step 2: Unzip the Folder
+1. Find the downloaded **`FindWaldo-main.zip`** file (usually in Downloads)
+2. Right-click on it and select **"Extract All"** or double-click it
+3. You now have a **FindWaldo** folder!
+
+### Step 3: Open VS Code
 1. Find the **VS Code** icon on your computer and double-click it
 2. You should see a window open with folders on the left side
 
-### Step 2: Open the Competition Folder
+### Step 4: Open the FindWaldo Folder
 1. Click **File** → **Open Folder** (top left corner)
-2. Navigate to and select the **FindWaldo** folder
+2. Navigate to and select the **FindWaldo** folder you just unzipped
 3. Click **Open**
 
-### Step 3: Find the Competition Notebook
+### Step 5: Find the Competition Notebook
 1. Look at the left sidebar in VS Code (called the "Explorer")
 2. Find the file called **`CompetitionNotebook.ipynb`**
 3. Double-click it to open!
 
-### Step 4: Start the Challenge!
+### Step 6: Start the Challenge!
 1. You'll see the notebook open with different sections
 2. To run code, click inside a cell (the grey boxes)
 3. Press **`Ctrl + Enter`** on your keyboard
