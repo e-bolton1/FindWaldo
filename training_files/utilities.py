@@ -343,18 +343,18 @@ def display_images_for_ranking(image_list):
     import cv2
     import numpy as np
     
-    # Step 1: Display all images WITHOUT confidence scores
-    print("🖼️ Here are the images. Study them carefully!\n")
-    for i, img_path in enumerate(image_list, 1):
-        img = Image.open(img_path)
-        show(cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR), f"Image {i}")
-
     # Step 2: Ask user to predict confidence scores
     print("\n" + "="*60)
     print("Predict the AI's confidence score for EACH image!")
     print("="*60)
     print("\n Enter confidence as a percentage (0-100)")
     print("Example: If you think AI is 85% confident, enter: 85\n")
+    
+    # Step 1: Display all images WITHOUT confidence scores
+    print("🖼️ Here are the images. Study them carefully!\n")
+    for i, img_path in enumerate(image_list, 1):
+        img = Image.open(img_path)
+        show(cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR), f"Image {i}")
 
     predicted_confidences = []
     for i, img_path in enumerate(image_list, 1):
