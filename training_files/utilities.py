@@ -347,7 +347,7 @@ def display_images_for_ranking(image_list):
     print("🖼️ Here are the images. Study them carefully!\n")
     for i, img_path in enumerate(image_list, 1):
         img = Image.open(img_path)
-        show(cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR), f"Image {i}: {img_path}")
+        show(cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR), f"Image {i}")
 
     # Step 2: Ask user to predict confidence scores
     print("\n" + "="*60)
@@ -358,7 +358,7 @@ def display_images_for_ranking(image_list):
 
     predicted_confidences = []
     for i, img_path in enumerate(image_list, 1):
-        conf_input = float(input(f"Predicted confidence for Image {i} ({img_path}): "))
+        conf_input = float(input(f"Predicted confidence for Image {i}: "))
         predicted_confidences.append(conf_input)
     
     return predicted_confidences
